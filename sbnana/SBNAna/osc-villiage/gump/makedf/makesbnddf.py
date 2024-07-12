@@ -471,45 +471,76 @@ def make_eevtdf(f):
     return df
 
 
-def make_eevtdf_sbnd(f):
-    # load slices and particles
-    partdf = make_epartdf_sbnd(f)
+def make_evtdf_sbnd(f):
 
-    df = make_eslcdf_sbnd(f)
+    # mcdf = make_mcdf(f)
+    slcdf = make_slc_trkdf(f)
 
-    # load the proton and muon candidates
-    primary = partdf.is_primary
-    mudf = partdf[primary & (partdf.pid == 2)].sort_values(partdf.index.names[:2] + [("length", "", "")]).groupby(level=[0,1]).last()
+    # PID
+    ts_cut = (slcdf.pfp.trackScore > 0.5)
+
+    pid_shw = np.invert(ts_cut)
+
+    # muon
+    MUSEL_MUSCORE_TH = 25
+    MUSEL_PSCORE_TH = 100
+    MUSEL_LEN_TH = 50
+
+    # TODO: used BDT scores
+    # muon_chi2 = (Avg(df, "muon", drop_0=True) < MUSEL_MUSCORE_TH) & (Avg(df, "proton", drop_0=True) > MUSEL_PSCORE_TH)
+    # len_cut = (masterdf.len.squeeze() > MUSEL_LEN_TH)
+    # dazzle_muon = (masterdf.dazzle.muonScore > 0.6)
+    # muon_cut = (muon_chi2) & (len_cut | dazzle_muon)
+
+    mu_score_cut = (slcdf.pfp.trk.chi2pid.I2.chi2_muon < MUSEL_MUSCORE_TH) & \
+        (slcdf.pfp.trk.chi2pid.I2.chi2_proton > MUSEL_PSCORE_TH)
+    mu_len_cut = (slcdf.pfp.trk.len > MUSEL_LEN_TH)
+    mu_cut = (mu_score_cut) & (mu_len_cut)
+    pid_mu = (ts_cut) & (mu_cut)
+
+    # proton 
+    PSEL_MUSCORE_TH = 0
+    PSEL_PSCORE_TH = 90
+    p_score_cut = (slcdf.pfp.trk.chi2pid.I2.chi2_muon > PSEL_MUSCORE_TH) & (slcdf.pfp.trk.chi2pid.I2.chi2_muon < PSEL_PSCORE_TH) 
+    p_cut = np.invert(mu_cut) & p_score_cut
+    pid_p = (ts_cut) & (p_cut)
+
+    # rest is pion
+    pi_cut = np.invert(mu_cut | p_cut)
+    pid_pi = (ts_cut) & (pi_cut)
+
+    # TODO: don't use trackscore
+
+    # ---------------------------
+
+    # store PID info
+    slcdf[("pfp", "pid", "", "", "", "")] = np.nan
+    slcdf.loc[pid_shw, ("pfp","pid")] = -1
+    slcdf.loc[pid_mu, ("pfp","pid")] = 13
+    slcdf.loc[pid_p, ("pfp","pid")] = 2212
+    slcdf.loc[pid_pi, ("pfp","pid")] = 211
+
+    mudf = slcdf[(slcdf.pfp.pid == 13)].sort_values(slcdf.pfp.index.names[:-1] + [("pfp", "trk", "len", "", "", "")]).groupby(level=[0,1,2]).last()
     mudf.columns = pd.MultiIndex.from_tuples([tuple(["mu"] + list(c)) for c in mudf.columns])
-
-    pdf = partdf[primary & (partdf.pid == 4)].sort_values(partdf.index.names[:2] + [("length", "", "")]).groupby(level=[0,1]).last()
+    
+    pdf = slcdf[(slcdf.pfp.pid == 2212)].sort_values(slcdf.pfp.index.names[:-1] + [("pfp", "trk", "len", "", "", "")]).groupby(level=[0,1,2]).last()
     pdf.columns = pd.MultiIndex.from_tuples([tuple(["p"] + list(c)) for c in pdf.columns])
-
-    df = multicol_merge(df, mudf, left_index=True, right_index=True, how="left", validate="one_to_one")
-    df = multicol_merge(df, pdf, left_index=True, right_index=True, how="left", validate="one_to_one")
-
+    
+    slcdf = multicol_merge(slcdf, mudf, left_index=True, right_index=True, how="left", validate="one_to_one")
+    slcdf = multicol_merge(slcdf, pdf, left_index=True, right_index=True, how="left", validate="one_to_one")
+    
     # in case we want to cut out other objects -- save the highest energy of each other particle
-    lead_gamma_energy = partdf.ke[primary & (partdf.pid == 0)].groupby(level=[0,1]).max().rename("lead_gamma_energy")
-    df = multicol_add(df, lead_gamma_energy)
+    lead_shw_length = slcdf.pfp.trk.len[(slcdf.pfp.pid < 0)].groupby(level=[0,1,2]).max().rename("lead_shw_length")
+    slcdf = multicol_add(slcdf, lead_shw_length)
+    
+    lead_pion_length = slcdf.pfp.trk.len[(slcdf.pfp.pid == 211)].groupby(level=[0,1,2]).max().rename("lead_pion_length")
+    slcdf = multicol_add(slcdf, lead_pion_length)
+    
+    subl_muon_length = slcdf[(slcdf.pfp.pid == 13)].sort_values(slcdf.pfp.index.names[:-1] + [("pfp", "trk", "len", "", "", "")]).pfp.trk.len.groupby(level=[0,1,2]).nth(-2).rename("subl_muon_length")
+    slcdf = multicol_add(slcdf, subl_muon_length)
+    
+    subl_proton_length = slcdf[(slcdf.pfp.pid == 2212)].sort_values(slcdf.pfp.index.names[:-1] + [("pfp", "trk", "len", "", "", "")]).pfp.trk.len.groupby(level=[0,1,2]).nth(-2).rename("subl_proton_length")
+    slcdf = multicol_add(slcdf, subl_proton_length)
 
-    lead_elec_energy = partdf.ke[primary & (partdf.pid == 1)].groupby(level=[0,1]).max().rename("lead_elec_energy")
-    df = multicol_add(df, lead_elec_energy)
+    return slcdf
 
-    lead_pion_length = partdf.length[primary & (partdf.pid == 3)].groupby(level=[0,1]).max().rename("lead_pion_length")
-    df = multicol_add(df, lead_pion_length)
-
-    subl_muon_length = partdf[primary & (partdf.pid == 2)].sort_values(partdf.index.names[:2] + [("length", "", "")]).length.groupby(level=[0,1]).nth(-2).rename("subl_muon_length")
-    df = multicol_add(df, subl_muon_length)
-
-    subl_proton_length = partdf[primary & (partdf.pid == 4)].sort_values(partdf.index.names[:2] + [("length", "", "")]).length.groupby(level=[0,1]).nth(-2).rename("subl_proton_length")
-    df = multicol_add(df, subl_proton_length)
-
-    # Apply pre-selection: Require fiducial vertex, at least one muon, at least one proton
-
-    # require both muon and proton to be present
-    df = df[~np.isnan(df.mu.pid) & ~np.isnan(df.p.pid)]
-
-    # require fiducial verex
-    df = df[InFV(df.vertex, 50)]
-
-    return df

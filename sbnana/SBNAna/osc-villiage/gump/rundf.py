@@ -1,7 +1,7 @@
 import sys
 import os
 from pyanalib.ntuple_glob import NTupleGlob
-from makedf.makedf import *
+from makedf.makesbnddf import *
 import pandas as pd
 import warnings
 # from tables import NaturalNameWarning

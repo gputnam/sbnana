@@ -1,0 +1,1 @@
+python rundf.py configs/evtdf.py test.df /pnfs/icarus/scratch/users/mueller/mc_run2_collonly/flat/mc-v09_84_00_01-202403-cnaf-corrsce_9999_20240325T114754-GenGenieFilter_20240325T121332-G4_20240325T131523-DetSim_20240325T135149-MCstage0-MCstage1.mlreco.flat.root

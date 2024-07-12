@@ -1,3 +1,4 @@
+# branches for the new CAF structure
 mchdrbranches = [
     "rec.hdr.pot",
     "rec.hdr.first_in_subrun",
@@ -84,7 +85,8 @@ pfpbranches = [
     pfpbranch + "parent",
     pfpbranch + "id",
     pfpbranch + "t0",
-] + pfobranches
+    pfpbranch + "ndaughters",
+] #+ pfobranches
 
 pfp_daughter_branch = [
     pfpbranch + "daughters"
@@ -95,23 +97,28 @@ trkbranches = [
     trkbranch + "start.x", trkbranch + "start.y", trkbranch + "start.z",
     trkbranch + "end.x", trkbranch + "end.y", trkbranch + "end.z",
     trkbranch + "dir.x", trkbranch + "dir.y", trkbranch + "dir.z",
+    trkbranch + "phi", trkbranch + "costh",
     trkbranch + "len",
     trkbranch + "rangeP.p_muon",
     trkbranch + "mcsP.fwdP_muon",
+    trkbranch + "mcsP.bwdP_muon",
+    trkbranch + "mcsP.is_bwd_muon",
     trkbranch + "rangeP.p_pion",
     trkbranch + "mcsP.fwdP_pion",
     trkbranch + "rangeP.p_proton",
     trkbranch + "mcsP.fwdP_proton",
     trkbranch + "bestplane",
-    trkbranch + "crthit.distance",
-    trkbranch + "crthit.hit.time",
-    trkbranch + "crthit.hit.pe",
+    trkbranch + "dazzle.bestScore",
+    trkbranch + "dazzle.muonScore",
+    trkbranch + "dazzle.otherScore",
+    trkbranch + "dazzle.pdg",
+    trkbranch + "dazzle.pionScore",
+    trkbranch + "dazzle.protonScore",
     trkbranch + "chi2pid.2.pid_ndof",
-    trkbranch + "chi2pid.2.pida",
     trkbranch + "chi2pid.2.chi2_kaon", trkbranch + "chi2pid.2.chi2_muon", trkbranch + "chi2pid.2.chi2_pion", trkbranch + "chi2pid.2.chi2_proton",
     trkbranch + "chi2pid.1.chi2_kaon", trkbranch + "chi2pid.1.chi2_muon", trkbranch + "chi2pid.1.chi2_pion", trkbranch + "chi2pid.1.chi2_proton",
     trkbranch + "chi2pid.0.chi2_kaon", trkbranch + "chi2pid.0.chi2_muon", trkbranch + "chi2pid.0.chi2_pion", trkbranch + "chi2pid.0.chi2_proton",
-] + pfpbranches
+    ]
 
 trkmcsbranches = [
   trkbranch + "mcsP.seg_length",
@@ -160,23 +167,26 @@ slcbranches = [
     "rec.slc.is_clear_cosmic",
     "rec.slc.vertex.x", "rec.slc.vertex.y", "rec.slc.vertex.z",
     "rec.slc.self",
-    "rec.slc.tmatch.eff",
-    "rec.slc.tmatch.pur",
-    "rec.slc.tmatch.index",
+    "rec.slc.tmatch.eff", "rec.slc.tmatch.pur", "rec.slc.tmatch.index",
     "rec.slc.producer",
-    "rec.slc.nuid.crlongtrkdiry",
+    "rec.slc.charge",
+    "rec.slc.truth.pdg",
     "rec.slc.nu_score",
     "rec.slc.fmatch.score", "rec.slc.fmatch.time",
 	"rec.slc.crumbs_result.score",
-]
+    "rec.slc.nuid.crlongtrkdiry"
+	]
 
 mcbranches = [
     "rec.mc.nu.E",
-    "rec.mc.nu.time",
-    "rec.mc.nu.bjorkenX",
-    "rec.mc.nu.inelasticityY",
-    "rec.mc.nu.Q2",
-    "rec.mc.nu.w",
+    'rec.mc.nu.time',
+    'rec.mc.nu.bjorkenX', 
+    'rec.mc.nu.inelasticityY',
+    'rec.mc.nu.Q2', 
+    'rec.mc.nu.q0', 
+    'rec.mc.nu.q0_lab',
+    'rec.mc.nu.t', 
+    'rec.mc.nu.w', 
     "rec.mc.nu.momentum.x",
     "rec.mc.nu.momentum.y",
     "rec.mc.nu.momentum.z",
@@ -186,40 +196,28 @@ mcbranches = [
     "rec.mc.nu.pdg",
     "rec.mc.nu.iscc",
     "rec.mc.nu.genie_mode",
-    "rec.mc.nu.parent_pdg",
-    "rec.mc.nu.parent_dcy_E",
-]
+    "rec.mc.nu.genie_inttype",
+    'rec.mc.nu.nneutron', 'rec.mc.nu.npiminus', 'rec.mc.nu.npiplus', 'rec.mc.nu.npizero', 'rec.mc.nu.nproton', 
+    'rec.mc.nu.nprim',
+    'rec.mc.nu.genweight',
+    'rec.mc.nu.parent_dcy_mode',
+    'rec.mc.nu.parent_pdg',
+    ]
 
 mcprimbranches = [
-    "rec.mc.nu.prim.genE",
-    "rec.mc.nu.prim.length",
-    "rec.mc.nu.prim.pdg",
-    "rec.mc.nu.prim.genp.x",
-    "rec.mc.nu.prim.genp.y",
-    "rec.mc.nu.prim.genp.z",
-    "rec.mc.nu.prim.start.x", "rec.mc.nu.prim.start.y", "rec.mc.nu.prim.start.z",
-    "rec.mc.nu.prim.end.x", "rec.mc.nu.prim.end.y", "rec.mc.nu.prim.end.z",
+    'rec.mc.nu.prim.pdg', 
+    'rec.mc.nu.prim.startE',
+    'rec.mc.nu.prim.genE',
+    'rec.mc.nu.prim.start.x', 'rec.mc.nu.prim.start.y', 'rec.mc.nu.prim.start.z',
+    'rec.mc.nu.prim.end.x','rec.mc.nu.prim.end.y','rec.mc.nu.prim.end.z',
+    'rec.mc.nu.prim.startp.x','rec.mc.nu.prim.endp.x',
+    'rec.mc.nu.prim.startp.y','rec.mc.nu.prim.endp.y',
+    'rec.mc.nu.prim.startp.z', 'rec.mc.nu.prim.endp.z',
     'rec.mc.nu.prim.end_process', 'rec.mc.nu.prim.start_process'
-]
+    ]
 
 slc_mcbranches = ["rec.slc.truth." + ".".join(s.split(".")[3:]) for s in mcbranches]
 slc_mcprimbranches = ["rec.slc.truth." + ".".join(s.split(".")[3:]) for s in mcprimbranches]
-
-mchbranches = [
-  "rec.mc.prtl.time",
-  "rec.mc.prtl.E",
-  "rec.mc.prtl.M",
-  "rec.mc.prtl.start.x", "rec.mc.prtl.start.y", "rec.mc.prtl.start.z",
-  "rec.mc.prtl.enter.x", "rec.mc.prtl.enter.y", "rec.mc.prtl.enter.z",
-  "rec.mc.prtl.exit.x", "rec.mc.prtl.exit.y", "rec.mc.prtl.exit.z",
-  "rec.mc.prtl.decay_length",
-  "rec.mc.prtl.allowed_decay_fraction",
-  "rec.mc.prtl.C1",
-  "rec.mc.prtl.C2",
-  "rec.mc.prtl.C3",
-  "rec.mc.prtl.C4",
-  "rec.mc.prtl.C5",
-]
 
 stubbranches = [
     "rec.slc.reco.stub.vtx.x",
@@ -228,11 +226,9 @@ stubbranches = [
     "rec.slc.reco.stub.end.x",
     "rec.slc.reco.stub.end.y",
     "rec.slc.reco.stub.end.z",
-
     "rec.slc.reco.stub.efield_vtx",
     "rec.slc.reco.stub.efield_end",
-
-
+    "rec.slc.reco.stub.pfpid",
     "rec.slc.reco.stub.truth.p.pdg",
     "rec.slc.reco.stub.truth.p.genE",
     "rec.slc.reco.stub.truth.p.interaction_id",
@@ -251,83 +247,3 @@ stubhitbranches = [
     "rec.slc.reco.stub.planes.hits.ontrack",
     "rec.slc.reco.stub.planes.hits.wire",
 ]
-
-eslc = "rec.dlp."
-
-eslcbranches = [
-    eslc + "is_neutrino",
-    eslc + "nu_id",
-    eslc + "num_particles",
-    eslc + "num_primaries",
-    eslc + "vertex.0",
-    eslc + "vertex.1",
-    eslc + "vertex.2",
-]
-
-eslcmatchedbranches = [
-    eslc + "match",
-]
-
-eslcmatchovrlpbranches = [
-    eslc + "match_overlap",
-]
-
-etruthint = "rec.dlp_true."
-
-etruthintbranches = [
-    etruthint + "id"
-]
-
-epart = "rec.dlp.particles."
-
-eparticlebranches = [
-    epart + "end_point.0",
-    epart + "end_point.1",
-    epart + "end_point.2",
-    epart + "is_contained",
-    epart + "is_primary",
-    epart + "is_principal_match",
-    epart + "is_valid",
-    epart + "length",
-    epart + "csda_ke",
-    epart + "ke",
-    epart + "momentum.0",
-    epart + "momentum.1",
-    epart + "momentum.2",
-    epart + "pid",
-    epart + "pid_scores.0",
-    epart + "pid_scores.1",
-    epart + "pid_scores.2",
-    epart + "pid_scores.3",
-    epart + "pid_scores.4",
-    epart + "start_point.0",
-    epart + "start_point.1",
-    epart + "start_point.2",
-    epart + "start_dir.0",
-    epart + "start_dir.1",
-    epart + "start_dir.2",
-]
-
-eparticlematchedbranches = [
-    epart + "match",
-]
-
-eparticlematchovrlpbranches = [
-    epart + "match_overlap",
-]
-
-etruthpart = "rec.dlp_true.particles."
-
-etrueparticlebranches = [
-    etruthpart + "track_id",
-    etruthpart + "id",
-]
-
-etruthint = "rec.dlp_true."
-
-etruthintbranches = [
-    etruthint + "id",
-    etruthint + "nu_id"
-]
-
-
