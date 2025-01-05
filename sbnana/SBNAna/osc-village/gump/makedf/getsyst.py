@@ -1,6 +1,7 @@
 import uproot
 import numpy as np
 import pandas as pd
+import awkward as ak
 
 def getsyst(f, systematics, nuind):
     if "globalTree" not in f:
@@ -11,13 +12,13 @@ def getsyst(f, systematics, nuind):
     globalTree = f["globalTree"]
     wgt_names = [n for n in f["globalTree"]['global/wgts/wgts.name'].arrays(library="np")['wgts.name'][0]]
     wgt_types = f["globalTree"]['global/wgts/wgts.type'].arrays(library="np")['wgts.type'][0]
-    wgt_nuniv = f["globalTree"]['global/wgts/wgts.nuniv'].arrays(library="pd")['wgts.nuniv'][0]
+    wgt_nuniv = ak.to_dataframe(f["globalTree"]['global/wgts/wgts.nuniv'].arrays(library="ak"))['wgts.nuniv'][0]
 
     isyst = pd.Series(np.repeat(list(range(len(wgt_nuniv))), wgt_nuniv), name="isyst")
     isyst.index.name = "iwgt"
     nuniv = wgt_nuniv.sum()
 
-    wgts = f["recTree"]['rec.mc.nu.wgt.univ'].arrays(library="pd")
+    wgts = ak.to_dataframe(f["recTree"]['rec.mc.nu.wgt.univ'].arrays(library="ak"))
     wgts["inu"] = wgts.index.get_level_values(1) // nuniv
     wgts["iwgt"] = wgts.index.get_level_values(1) % nuniv
     wgts = wgts.reset_index().set_index(["entry", "inu", "iwgt"]).drop(columns="subentry")
@@ -39,9 +40,9 @@ def getsyst(f, systematics, nuind):
         elif wgt_types[isyst] == 3 and wgt_nuniv[isyst] > 1: # +/- sigma unisim
             nsigma = wgts[wgts.isyst == isyst].wgt.groupby(level=[0,1]).size().values[0] // 2
             for isigma in range(nsigma):
-                s_ps = wgts[wgts.isyst == isyst].wgt.groupby(level=[0,1]).nth(2*isigma)
+                s_ps = wgts[wgts.isyst == isyst].wgt.groupby(level=[0,1]).nth(2*isigma).drop_level(2)
                 s_ps.name = (s, "ps%i" % (isigma+1))
-                s_ms = wgts[wgts.isyst == isyst].wgt.groupby(level=[0,1]).nth(2*isigma+1)
+                s_ms = wgts[wgts.isyst == isyst].wgt.groupby(level=[0,1]).nth(2*isigma+1).drop_level(2)
                 s_ms.name = (s, "ms%i" % (isigma+1))
  
                 this_systs.append(s_ps)

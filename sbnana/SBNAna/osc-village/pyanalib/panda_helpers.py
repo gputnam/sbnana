@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import awkward as ak
 def broadcast(v, df):
     for vi, ii in zip(v.index.names, df.index.names):
         if vi != ii:
@@ -92,8 +92,8 @@ def loadbranches(tree, branches, **uprargs):
         elif vectors != this_vectors:
             raise ValueError("Branches %s and %s have different vector structures in the CAF." % (branches[0], branch))
 
-    lengths = [tree.arrays([v+"..length"], library="pd", **uprargs) for v in vectors]
-    data = tree.arrays(branches, library="pd", **uprargs)
+    lengths = [ak.to_dataframe(tree.arrays([v+"..length"], library="ak", **uprargs)) for v in vectors]
+    data = ak.to_dataframe(tree.arrays(branches, library="ak", **uprargs))
 
     # If there's no vectors, we can just return the top guy
     if len(lengths) == 0:

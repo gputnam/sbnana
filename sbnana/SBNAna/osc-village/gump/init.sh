@@ -8,6 +8,7 @@ if [[ $machine == *icarus* ]]; then
   source /cvmfs/icarus.opensciencegrid.org/products/icarus/setup_icarus.sh
 fi
 
+setup python v3_9_2
 setup hdf5 v1_12_0a -q e20:prof
 
 python3 -m venv env
