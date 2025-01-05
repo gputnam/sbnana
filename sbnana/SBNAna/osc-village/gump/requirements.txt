@@ -1,10 +1,10 @@
 cffi
-jupyterlab==3.3.0a1
-numpy
-uproot==4.3.4
+jupyterlab
+numpy==1.26.4
+uproot==5.5.1
 matplotlib
 scipy
-pandas==1.1.5
+pandas==2.2.3
 nbstripout
 tqdm
 ipywidgets
@@ -15,3 +15,4 @@ emcee
 corner
 lz4
 xxhash
+awkward-pandas
